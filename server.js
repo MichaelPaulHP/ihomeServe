@@ -3,25 +3,46 @@ let port = process.env.PORT || 1337;
 let express = require("express");
 let bodyParser = require("body-parser");
 let cors = require("cors");
+let firebaseAdmin= require("firebase-admin");
 
 
 let app = express();
+
 // Config   cors
 app.use(cors());
 
+// BodyParser
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 // start server
 let server = app.listen(port);
+
 // init socketIO serve
 let io = require("socket.io")(server);
+
+// CONFIG FIREBASE
+const firebaseConfig = require("./config/firebase");
+firebaseAdmin.initializeApp({
+    credential: firebaseAdmin.credential.cert(firebaseConfig.credential),
+    databaseURL: firebaseConfig.databaseURL
+});
 
 
 app.get("/", (req, res) => {
     res.send("GG! Home");
 });
 
+
+
+
+/*let person=require("./providers/Person");
+let personTwo=require("./providers/Person");
+console.log(person);
+person.incrementAge();
+console.log(person);
+console.log(personTwo)
+*/
 
 console.log("GG!");
 io.on("connection", (socket) => {
@@ -54,9 +75,16 @@ io.on("connection", (socket) => {
         console.log(user);
         console .log(latitude+"  "+longitude);
     });
-    socket.on("disconnect", () => {
+    socket.on("disconnectService", (data) => {
+        let user = data.user;
+
+        console.log("disconnectService");
+        console.log(user);
+        
+    });
+    socket.on("disconnect", (reason) => {
         socket.emit("changeStateHouse", {"state": "false"});
-        console.log("disconnect:" + socket.id);
+        console.log("disconnect:" + socket.id+" reason: "+reason);
 
     });
 });
