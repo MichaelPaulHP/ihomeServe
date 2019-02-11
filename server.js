@@ -9,11 +9,15 @@ let firebaseAdmin= require("firebase-admin");
 let app = express();
 
 // Config   cors
-app.use(cors());
+//app.use(cors());
 
-// BodyParser
+// BodyParser ==============================================================
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+//Routes ==============================================================
+var routes= require("./App/Routes");
+routes.assignRoutes(app);
 
 // start server
 let server = app.listen(port);
@@ -46,6 +50,7 @@ console.log(personTwo)
 
 console.log("GG!");
 io.on("connection", (socket) => {
+
 
     console.log("new connection, sockedId: " + socket.id);
     socket.emit("changeStateHouse", {"state": "true"});
