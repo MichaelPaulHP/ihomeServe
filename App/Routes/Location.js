@@ -8,6 +8,7 @@ var api = express.Router();
 
 
 api.post("/save",  LocationController.saveLocation);
+api.post("/message",  LocationController.saveMessage);
 // api.put("/update-role/:id",  RoleController.updateRole);
 api.get("/get",  LocationController.getTest);
 

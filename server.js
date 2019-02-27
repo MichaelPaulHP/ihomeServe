@@ -19,11 +19,13 @@ app.use(bodyParser.json());
 var routes= require("./App/Routes");
 routes.assignRoutes(app);
 
+
 // start server
 let server = app.listen(port);
 
 // init socketIO serve
 let io = require("socket.io")(server);
+
 
 // CONFIG FIREBASE
 const firebaseConfig = require("./config/firebase");
@@ -49,6 +51,9 @@ console.log(personTwo)
 */
 
 console.log("GG!");
+let hello ;
+
+
 io.on("connection", (socket) => {
 
 

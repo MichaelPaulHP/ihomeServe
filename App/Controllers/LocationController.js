@@ -11,6 +11,12 @@ exports.saveLocation = function(req,res){
 
     res.send("saved");
 };
+exports.saveMessage = function(req,res){
+
+    var body=req.body;
+    console.log(body);
+    res.send("complete");
+};
 exports.getTest = function(req,res){
 
     var body=req.body;
