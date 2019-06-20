@@ -1,6 +1,6 @@
 'use strict';
 const firebaseAdmin = require('firebase-admin');
-const firebaseConfig = require("../config/firebase");
+const firebaseConfig = require("../Config/firebase");
 
 
 class FirebaseAdmin {

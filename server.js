@@ -4,9 +4,11 @@ let express = require("express");
 let bodyParser = require("body-parser");
 let cors = require("cors");
 let firebaseAdmin= require("firebase-admin");
-
+var mongoose =require("mongoose");
 
 let app = express();
+
+
 
 // Config   cors
 //app.use(cors());
@@ -19,6 +21,19 @@ app.use(bodyParser.json());
 var routes= require("./App/Routes");
 routes.assignRoutes(app);
 
+// configuration DB ===============================================================
+
+var configDB = require('./Config/database');
+mongoose.connect(configDB.url, {
+        useMongoClient:true,
+        user:configDB.user,
+        pass:configDB.pass},
+    function (err) {
+        if (err) {
+            console.log("ERROR MongoDB: "+err.message);
+        }
+    }); // connect to our database
+
 
 // start server
 let server = app.listen(port);
@@ -28,7 +43,7 @@ let io = require("socket.io")(server);
 
 
 // CONFIG FIREBASE
-const firebaseConfig = require("./config/firebase");
+const firebaseConfig = require("./Config/firebase");
 firebaseAdmin.initializeApp({
     credential: firebaseAdmin.credential.cert(firebaseConfig.credential),
     databaseURL: firebaseConfig.databaseURL
@@ -36,7 +51,7 @@ firebaseAdmin.initializeApp({
 
 
 app.get("/", (req, res) => {
-    res.send("GG! Home");
+    res.send("GG! !Home");
 });
 
 
@@ -58,6 +73,7 @@ io.on("connection", (socket) => {
 
 
     console.log("new connection, sockedId: " + socket.id);
+
     socket.emit("changeStateHouse", {"state": "true"});
     socket.on("changeState", (data) => {
         data = JSON.parse(data);
@@ -96,5 +112,8 @@ io.on("connection", (socket) => {
         socket.emit("changeStateHouse", {"state": "false"});
         console.log("disconnect:" + socket.id+" reason: "+reason);
 
+
+
     });
+
 });
