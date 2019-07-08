@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Hola Mundo</h1>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+
+<script type="text/javascript">
+
+    const socket = io('http://localhost:1337');
+
+    let destinationsFound=[];
+    userID="999766470";
+    socket.on('connect', () => {
+        console.log(socket.connected); // true
+        console.log(socket.id);
+        //socket.emit("testSaveUser",{userID:userID});
+        let localization={name: "777777777",latitude:"999987",longitude:"5444"};
+        socket.emit("findDestinations",localization);
+        let destination ={name:"777777777",color:"3424332",numUsers:"0",latitude:"5000",longitude:"777"};
+        socket.emit("newTempDestination",destination);
+
+        socket.on("destinationsFound",(data)=>{
+            destinationsFound.push(data);
+            console.log("destinationsFound");
+            console.log(destinationsFound);
+            let destionToJoin= {userID:userID,idDestination:data.idDestination};
+            socket.emit("joinToDestination",destionToJoin);
+        });
+        socket.on("joinToDestination",(data)=>{
+            console.log("joinToDestination");
+            console.log(data);
+            socket.emit("getMyDestinations",{userID:userID})
+        });
+        socket.on("getMyDestinations",(data)=>{
+            console.log("getMyDestinations");
+            console.log(data);
+        });
+
+        socket.emit("message", "hola de html");
+    });
+
+</script>
+</body>
+</html>
