@@ -94,7 +94,8 @@ appDW.intent('prender_apagar_dispositivo',( conv,params) => {
         console.log(params);
         let state=params.status;
         let device =params.devices;
-        if(state!=null && device!=null) {
+        let deviceSaved=findDeviceByName(device);
+        if(state!=null && device!=null && deviceSaved!=null) {
             device=device.toUpperCase();
             io.emit("changeState", {mode: "INPUT", name: device, state: state});
             conv.ask('Listo, fue facil');
