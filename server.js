@@ -1,5 +1,6 @@
 "use strict";
 let port = process.env.PORT || 1337;
+let Device =require("./App/Models/Device");
 let express = require("express");
 let bodyParser = require("body-parser");
 let cors = require("cors");
@@ -58,8 +59,29 @@ firebaseAdmin.initializeApp({
 
 
 app.get("/", (req, res) => {
-    res.send("GG! !Home");
+    res.send("GG! !Home add actios on google");
 });
+
+let devices=[new Device("LED","0","0"),new Device("VENTILADOR","0","0")];
+
+function findDeviceByName(name){
+    name=name.toUpperCase();
+    for (let i =0;i<devices.length;i++){
+        if(devices[i].name===name){
+            return devices[i];
+        }
+    }
+    return null;
+}
+function stateToString(state){
+    if(state=="1"){
+        return "encendido"
+    }
+    if(state=="0"){
+        return "apagado"
+    }
+    return state;
+}
 
 // actions-on-google ==============================================================
 const appDW = dialogflow();
@@ -67,27 +89,51 @@ app.post('/fulfillment', appDW);
 
 appDW.intent('prender_apagar_dispositivo',( conv,params) => {
 
-    console.log(params);
-    let state=params.status;
-    let device =params.devices;
-    io.emit("changeState",{mode:"INPUT",name:device,state:state});
 
-    conv.ask('Listo, fue facil');
+    try {
+        console.log(params);
+        let state=params.status;
+        let device =params.devices;
+        if(state!=null && device!=null) {
+            device=device.toUpperCase();
+            io.emit("changeState", {mode: "INPUT", name: device, state: state});
+            conv.ask('Listo, fue facil');
+        }
+        else{
+            conv.ask('no entendí bien, por favor repite');
+        }
+    }catch (e) {
+        conv.ask('oh no algo anda mal');
+    }
+
+});
+appDW.intent('get_state_device',(conv,params) => {
+
+    try {
+        console.log(params);
+        let state=params.status;
+        let device =params.devices;
+
+        let deviceFound = findDeviceByName(device.toUpperCase());
+        if(deviceFound==null){
+            conv.ask('oh no algo anda mal, por favor repite');
+        }
+        else{
+
+            conv.ask("el "+ deviceFound.name+" esta " +stateToString(deviceFound.state));
+        }
+    }catch (e) {
+        conv.ask('oh no algo anda mal, por favor repite');
+    }
+
 
 });
 
 
 
 
-/*let person=require("./providers/Person");
-let personTwo=require("./providers/Person");
-console.log(person);
-person.incrementAge();
-console.log(person);
-console.log(personTwo)
-*/
-
 console.log("GG!");
+
 let hello;
 let Localization = require("./App/Models/Localization");
 let Destination = require("./App/Models/Destination");
@@ -190,19 +236,26 @@ io.on("connection", (socket) => {
         });
 
     });
-    socket.emit("changeStateHouse", {"state": "true"});
+
+    socket.on("changeStateHouse",(data)=>{
+        let state=data.state;
+        socket.emit("changeStateHouse", {"state": state});
+    });
+
     socket.on("changeState", (data) => {
         //data = JSON.parse(data);
         console.log(data);
+        let deviceName=data.name;
+        let deviceState=data.state;
 
         if (data.mode === "INPUT") {
             // si es por ejemplo un sensor de fuego
-            if (data.status === '1') {
-                // prender led
-                socket.emit("changeState", {"name": "led", "state": 1});
-            } else {
-                socket.emit("changeState", {"name": "led", "state": 0});
+            let device= findDeviceByName(deviceName);
+            if(device!=null){
+                device.state=deviceState;
+                socket.emit("changeState", {"name": device.name, "state":device.state});
             }
+
         } else {
             // es el led
             console.log(data.name + " is " + data.state);
