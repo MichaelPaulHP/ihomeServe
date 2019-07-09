@@ -11,7 +11,9 @@
 
 <script type="text/javascript">
 
-    const socket = io('http://localhost:1337');
+    //const socket = io('http://localhost:1337');
+    const URL_BASE="https://ihomeserve.herokuapp.com";
+    const socket = io(URL_BASE);
 
     let destinationsFound=[];
     userID="999766470";
@@ -40,7 +42,10 @@
             console.log("getMyDestinations");
             console.log(data);
         });
-
+        socket.on("changeState",(data)=>{
+            console.log("changeState");
+            console.log(data);
+        });
         socket.emit("message", "hola de html");
     });
 

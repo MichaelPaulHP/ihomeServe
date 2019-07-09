@@ -8,6 +8,8 @@ var mongoose = require("mongoose");
 
 let app = express();
 
+const {dialogflow, Image,} = require('actions-on-google');
+
 
 // Config   cors
 //app.use(cors());
@@ -15,6 +17,10 @@ let app = express();
 // BodyParser ==============================================================
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+
+
+
 
 //Routes ==============================================================
 var routes = require("./App/Routes");
@@ -54,6 +60,23 @@ firebaseAdmin.initializeApp({
 app.get("/", (req, res) => {
     res.send("GG! !Home");
 });
+
+// actions-on-google ==============================================================
+const appDW = dialogflow();
+app.post('/fulfillment', appDW);
+
+appDW.intent('prender_apagar_dispositivo',( conv,params) => {
+
+    console.log(params);
+    let state=params.status;
+    let device =params.devices;
+    io.emit("changeState",{mode:"INPUT",name:device,state:state});
+
+    conv.ask('Listo, fue facil');
+
+});
+
+
 
 
 /*let person=require("./providers/Person");
@@ -169,12 +192,12 @@ io.on("connection", (socket) => {
     });
     socket.emit("changeStateHouse", {"state": "true"});
     socket.on("changeState", (data) => {
-        data = JSON.parse(data);
-        console.log(data.state);
+        //data = JSON.parse(data);
+        console.log(data);
 
         if (data.mode === "INPUT") {
             // si es por ejemplo un sensor de fuego
-            if (data.state === 1) {
+            if (data.status === '1') {
                 // prender led
                 socket.emit("changeState", {"name": "led", "state": 1});
             } else {
