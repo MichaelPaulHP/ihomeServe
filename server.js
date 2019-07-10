@@ -65,6 +65,7 @@ app.get("/", (req, res) => {
 let devices=[new Device("LED","0","0"),new Device("VENTILADOR","0","0")];
 
 function findDeviceByName(name){
+    if(name==null){return null;}	
     name=name.toUpperCase();
     for (let i =0;i<devices.length;i++){
         if(devices[i].name===name){
