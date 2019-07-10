@@ -76,8 +76,8 @@ let devices=[
 	new Device("FUEGO","0" ,"0"),
 	new Device("SONIDO","0" ,"0"),
 	new Device("HUMO","0" ,"0"),
-	new Device("TEMPERATURA SALA","0" ,"0")
-	new Device("TEMPERATURA COCINA","0" ,"0")
+	new Device("TEMPERATURA SALA","0" ,"0"),
+	new Device("TEMPERATURA COCINA","0" ,"0"),
 	new Device("TEMPERATURA DORMITORIO","0" ,"0")
 	];
 function findDeviceByName(name){
