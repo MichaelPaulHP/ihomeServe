@@ -62,8 +62,24 @@ app.get("/", (req, res) => {
     res.send("GG! !Home add actios on google");
 });
 
-let devices=[new Device("LED","0","0"),new Device("VENTILADOR","0","0")];
-
+//let devices=[new Device("LED","0","0"),new Device("VENTILADOR","0","0")];
+let devices=[
+	new Device("LUZ DORMITORIO","0" ,"0"),
+	new Device("LUZ SALA","0" ,"0"),
+	new Device("LUZ BANIO","0" ,"0"),
+	new Device("LUZ COCINA","0" ,"0"),
+	new Device("GARAGE","0" ,"0"),
+	new Device("VENTILADOR","0" ,"0"),
+	new Device("MOVIMIENTO PUERTA","0" ,"0"),
+	new Device("MOVIMIENTO PUERTA ATRAS","0" ,"0"),
+	new Device("MOVIMIENTO PUERTA DOS","0" ,"0"),
+	new Device("FUEGO","0" ,"0"),
+	new Device("SONIDO","0" ,"0"),
+	new Device("HUMO","0" ,"0"),
+	new Device("TEMPERATURA SALA","0" ,"0")
+	new Device("TEMPERATURA COCINA","0" ,"0")
+	new Device("TEMPERATURA DORMITORIO","0" ,"0")
+	];
 function findDeviceByName(name){
     if(name==null){return null;}	
     name=name.toUpperCase();
@@ -96,9 +112,9 @@ appDW.intent('prender_apagar_dispositivo',( conv,params) => {
         let state=params.status;
         let device =params.devices;
         let deviceSaved=findDeviceByName(device);
-        if(state!=null && device!=null && deviceSaved!=null) {
-            device=device.toUpperCase();
-            io.emit("changeState", {mode: "INPUT", name: device, state: state});
+        if(state &&  deviceSaved!=null) {
+            //device=device.toUpperCase();
+            io.emit("changeState", {mode: "INPUT", name: deviceSaved.name, state: state});
             conv.ask('Listo, fue facil');
         }
         else{
@@ -109,6 +125,7 @@ appDW.intent('prender_apagar_dispositivo',( conv,params) => {
     }
 
 });
+
 appDW.intent('get_state_device',(conv,params) => {
 
     try {
@@ -131,6 +148,35 @@ appDW.intent('get_state_device',(conv,params) => {
 
 });
 
+appDW.intent('open_close_device',(conv,params) => {
+
+    try {
+	console.log("open_close_device");
+        console.log(params);
+        let state=params.status;
+        let device =params.devices;
+
+        let deviceFound = findDeviceByName(device.toUpperCase());
+        if(deviceFound!=null && state){
+	    deviceFound.state=state;
+            io.emit("changeState", {mode: "OUTPUT", name: deviceFound.name, state: state});
+	    conv.ask(toOpenOrClose(state));
+        }
+        else{
+            conv.ask('No entiendo si voy abrir o cerrar');
+        }
+    }catch (e) {
+        conv.ask('oh no algo anda mal, por favor repite');
+    }
+
+
+});
+function toOpenOrClose(x){
+    if(x=="0"){
+	return "cerrado";
+    }
+    else{return "abierto";}
+}
 
 
 
@@ -241,7 +287,7 @@ io.on("connection", (socket) => {
 
     socket.on("changeStateHouse",(data)=>{
         let state=data.state;
-        socket.emit("changeStateHouse", {"state": state});
+        socket.broadcast.emit("changeStateHouse", {"state": state});
     });
 
     socket.on("changeState", (data) => {
