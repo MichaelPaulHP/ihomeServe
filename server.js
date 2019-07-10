@@ -248,19 +248,21 @@ io.on("connection", (socket) => {
         console.log(data);
         let deviceName=data.name;
         let deviceState=data.state;
-
+	let device= findDeviceByName(deviceName);
+        if(device!=null){
+		device.state=deviceState;
         if (data.mode === "INPUT") {
             // si es por ejemplo un sensor de fuego
-            let device= findDeviceByName(deviceName);
-            if(device!=null){
-                device.state=deviceState;
-                socket.emit("changeState", {"name": device.name, "state":device.state});
-            }
+                socket.emit("changeState", {"name": device.name, "state":device.state,mode: "INPUT"});
+            
 
         } else {
             // es el led
             console.log(data.name + " is " + data.state);
+	    socket.emit("changeState", {"name": device.name, "state":device.state,mode: "OUTPUT"});
         }
+	}
+	console.log("device not found");
 
     });
     socket.on("testSaveUser", (data) => {
