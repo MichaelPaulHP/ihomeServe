@@ -253,16 +253,16 @@ io.on("connection", (socket) => {
 		device.state=deviceState;
         if (data.mode === "INPUT") {
             // si es por ejemplo un sensor de fuego
-                socket.emit("changeState", {"name": device.name, "state":device.state,mode: "INPUT"});
+                socket.broadcast.emit("changeState", {"name": device.name, "state":device.state,mode: "INPUT"});
             
 
         } else {
             // es el led
             console.log(data.name + " is " + data.state);
-	    socket.emit("changeState", {"name": device.name, "state":device.state,mode: "OUTPUT"});
+	    socket.broadcast.emit("changeState", {"name": device.name, "state":device.state,mode: "OUTPUT"});
         }
 	}
-	console.log("device not found");
+	else{console.log("device not found");}
 
     });
     socket.on("testSaveUser", (data) => {
