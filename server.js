@@ -56,7 +56,7 @@ firebaseAdmin.initializeApp({
 
 
 app.get("/", (req, res) => {
-    res.send("GG! !Home add actios on google");
+    res.send("GG! !Home ");
 });
 
 //let devices=[new Device("LED","0","0"),new Device("VENTILADOR","0","0")];
