@@ -12,33 +12,59 @@ var DestinationSchema = new schema({
     },
     numUsers: {
         type: Number,
-        required:true,
+        required: true,
+    },
+    participants:{
+      type:[{type:String,unique: true}]
+    },
+    isActive:{
+        type: Boolean
+    },
+    idChat: {
+        type: String,
+        required: true,
     },
     color: {
         type: String,
-        required:true,
+        required: true,
+    },
+    createBy: {
+        type: String,
+        required: true,
     },
     latitude: {
         type: String,
-        required:true,
+        required: true,
     },
     longitude: {
         type: String,
-        required:true,
+        required: true,
     }
 
-},{timestamps: true});
+}, {timestamps: true});
 
-DestinationSchema.methods.toJSON = function ( ) {
+DestinationSchema.methods.toJSON = function () {
     return {
-        idDestination:this.id,
+        idDestination: this.id,
         name: this.name,
-        numUsers: this.numUsers+"",
+        idChat:this.idChat,
+        createBy:this.createBy,
+        numUsers: this.numUsers + "",
         color: this.color,
-        latitude:this.latitude,
+        latitude: this.latitude,
         longitude: this.longitude
     };
 };
+DestinationSchema.methods.set = function (data) {
 
+    this.name = data.name;
+    this.color = data.color;
+    this.numUsers = data.numUsers;
+    this.latitude = data.latitude;
+    this.longitude = data.longitude;
+    this.idChat = data.idChat;
+    this.createBy = data.userID;
 
-module.exports=mongoose.model('Destination', DestinationSchema);
+};
+
+module.exports = mongoose.model('Destination', DestinationSchema);

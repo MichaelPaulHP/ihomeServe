@@ -208,35 +208,62 @@ io.on("connection", (socket) => {
     socket.on("myLocalizationChange", (data) => {
 
     });
-    socket.on("newTempDestination", (data) => {
-        let destination = new Destination();
-        destination.name = data.name;
-        destination.color = data.color;
-        destination.numUsers = data.numUsers;
-        destination.latitude = data.latitude;
-        destination.longitude = data.longitude;
 
+
+    socket.on("newDestination", (data) => {
+
+        console.log("newDestination");
+        let userID=data.userID;
+        let destination = new Destination();
+        destination.set(data);
+        destination.numUsers = 1;
+        destination.participants.push(userID);
+        destination.isActive=true;
 
         destination.save((err, destinationSaved) => {
             if (err) {
-                console.log("ERR newTempDestination" + err);
+                console.error(err);
             } else {
-                let result = destinationSaved.toJSON();
-                console.log("newTempDestination");
-                console.log(result);
-                socket.emit("destinationsFound", result);
+                let destinationJson = destinationSaved.toJSON();
+
+                socket.join(destinationSaved._id);
+                socket.emit("joinToDestination", destinationJson);
+
+                User.findOneAndUpdate(
+                    {idGoogle:userID },
+                    {$push: {destinations: idDestination}},
+                    (err, user, res) => {
+
+                        console.log("newDestination UserfindOneAndUpdate");
+
+                        if (err) {
+                            console.error(err);
+                        }
+                    });
             }
         });
-
-
     });
+
+
     socket.on("joinToDestination", (data) => {
         let userId = data.userID;
         let idDestination = data.idDestination;
-        Destination.findByIdAndUpdate(idDestination, {$inc: {numUsers: 1}}, (err, doc, res) => {
+
+        Destination.findByIdAndUpdate(idDestination,{$push: {participants: idDestination},$inc:{numUsers:1}},(err, doc) => {
             //doc is a destinations numUser:previos
             if (doc && !err) {
                 console.log("joinToDestination Destination.findByIdAndUpdate doc");
+                console.log(doc);
+
+                doc.numUsers = doc.numUsers + 1;
+                let destinationJson = doc.toJSON();
+
+                // sending to all clients in 'game' room, including sender
+                io.in(idDestination).emit('joinToDestination', destinationJson);
+
+                //socket.to(idDestination).broadcast.emit("joinToDestination",destinationJson);
+                //socket.emit("joinToDestination", destinationJson);
+
                 User.findOneAndUpdate(
                     {idGoogle: userId},
                     {$push: {destinations: idDestination}},
@@ -244,39 +271,77 @@ io.on("connection", (socket) => {
                         console.log("joinToDestination UserfindOneAndUpdate");
                         // user is a User with added destinations
                         if (user && !err) {
-                            let cantUser = doc.numUsers + 1;
-                            let result = doc.toJSON();
-                            result.numUsers = cantUser + "";
-                            socket.emit("joinToDestination", result);
-                            Destination.deleteMany({numUser: 0});
+
                         }
                         if (err) {
-                            console.log("ERR User.findOneAndUpdate" + err);
+                            console.error("ERR User.findOneAndUpdate" + err);
                         }
                     });
 
             }
             if (err) {
-                console.log("ERR Destination.findByIdAndUpdate" + err);
+                console.error("ERR Destination.findByIdAndUpdate" + err);
             }
         });
     });
 
 
     socket.on("getMyDestinations", (data) => {
+
+        console.log("getMyDestinations");
+
         let userId = data.userID;
         User.findOne({idGoogle: userId}, (err, doc) => {
             if (doc) {
+                let destinations = doc.destinations;
                 console.log("getMyDestinations");
-                console.log(doc.destinations);
-                socket.emit("getMyDestinations", doc.destinations);
+                console.log(destinations);
+                for (let i = 0; i < destinations.length; i++) {
+                    let id = destinations[i];
+                    Destination.findById(id, (err, res) => {
+                        if (!err && res) {
+
+                            // join to room idDestination
+                            socket.join(id);
+                            let resJson = res.toJSON();
+                            socket.emit("getMyDestinations", resJson);
+                        }
+                        if(err){console.error(err)}
+                    });
+                }
+
             }
             if (err) {
-                console.log("ERR getMyDestinations" + err);
+                console.error("ERR getMyDestinations" + err);
             }
         });
 
     });
+
+    socket.on("completeDestination",(data)=>{
+
+        let idDestination=data.idDestination;
+
+        Destination.findByIdAndUpdate(idDestination,{"isActive":false},(err,res)=>{
+            if(!err && res){
+
+                // emit to room idDestination include sender
+                io.in(idDestination).emit("completeDestination",idDestination);
+                socket.leave(idDestination);
+
+                let participants=res.participants;
+                for(let i=0;i<participants.length;i++){
+                    let idUser=participants[i];
+                    User.findOneAndUpdate({idGoogle:idUser},{ $pull:{destinations:idDestination}},(err,doc,res)=>{
+
+                    });
+                }
+
+
+            }
+        })
+    });
+
 
     socket.on("changeStateHouse", (data) => {
         let state = data.state;
