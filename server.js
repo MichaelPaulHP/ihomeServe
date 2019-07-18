@@ -242,7 +242,7 @@ io.on("connection", (socket) => {
         let state=data.state;
         socket.emit("changeStateHouse", {"state": state});
     });
-
+	// change to state value	
     socket.on("changeState", (data) => {
         //data = JSON.parse(data);
         console.log(data);
@@ -255,6 +255,7 @@ io.on("connection", (socket) => {
             if(device!=null){
                 device.state=deviceState;
                 socket.emit("changeState", {"name": device.name, "state":device.state});
+		//io.emit("changeState", {mode: "INPUT", name: device, state: state});
             }
 
         } else {
