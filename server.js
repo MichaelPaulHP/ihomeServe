@@ -1,6 +1,6 @@
 "use strict";
 let port = process.env.PORT || 1337;
-let Device =require("./App/Models/Device");
+let Device = require("./App/Models/Device");
 let express = require("express");
 let bodyParser = require("body-parser");
 let cors = require("cors");
@@ -18,9 +18,6 @@ const {dialogflow, Image,} = require('actions-on-google');
 // BodyParser ==============================================================
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-
-
-
 
 
 //Routes ==============================================================
@@ -62,22 +59,43 @@ app.get("/", (req, res) => {
     res.send("GG! !Home add actios on google");
 });
 
-let devices=[new Device("LED","0","0"),new Device("VENTILADOR","0","0")];
+//let devices=[new Device("LED","0","0"),new Device("VENTILADOR","0","0")];
+let devices = [
+    new Device("LUZ DORMITORIO", "0", "0"),
+    new Device("LUZ SALA", "0", "0"),
+    new Device("LUZ BANIO", "0", "0"),
+    new Device("LUZ COCINA", "0", "0"),
+    new Device("GARAGE", "0", "0"),
+    new Device("VENTILADOR", "0", "0"),
+    new Device("MOVIMIENTO PUERTA", "0", "0"),
+    new Device("MOVIMIENTO PUERTA ATRAS", "0", "0"),
+    new Device("MOVIMIENTO PUERTA DOS", "0", "0"),
+    new Device("FUEGO", "0", "0"),
+    new Device("SONIDO", "0", "0"),
+    new Device("HUMO", "0", "0"),
+    new Device("TEMPERATURA SALA", "0", "0"),
+    new Device("TEMPERATURA COCINA", "0", "0"),
+    new Device("TEMPERATURA DORMITORIO", "0", "0")
+];
 
-function findDeviceByName(name){
-    name=name.toUpperCase();
-    for (let i =0;i<devices.length;i++){
-        if(devices[i].name===name){
+function findDeviceByName(name) {
+    if (name == null) {
+        return null;
+    }
+    name = name.toUpperCase();
+    for (let i = 0; i < devices.length; i++) {
+        if (devices[i].name === name) {
             return devices[i];
         }
     }
     return null;
 }
-function stateToString(state){
-    if(state=="1"){
+
+function stateToString(state) {
+    if (state == "1") {
         return "encendido"
     }
-    if(state=="0"){
+    if (state == "0") {
         return "apagado"
     }
     return state;
@@ -87,50 +105,78 @@ function stateToString(state){
 const appDW = dialogflow();
 app.post('/fulfillment', appDW);
 
-appDW.intent('prender_apagar_dispositivo',( conv,params) => {
+appDW.intent('prender_apagar_dispositivo', (conv, params) => {
 
 
     try {
         console.log(params);
-        let state=params.status;
-        let device =params.devices;
-        let deviceSaved=findDeviceByName(device);
-        if(state!=null && device!=null && deviceSaved!=null) {
-            device=device.toUpperCase();
-            io.emit("changeState", {mode: "INPUT", name: device, state: state});
+        let state = params.status;
+        let device = params.devices;
+        let deviceSaved = findDeviceByName(device);
+        if (state && deviceSaved != null) {
+            //device=device.toUpperCase();
+            io.emit("changeState", {mode: "INPUT", name: deviceSaved.name, state: state});
             conv.ask('Listo, fue facil');
-        }
-        else{
+        } else {
             conv.ask('no entendí bien, por favor repite');
         }
-    }catch (e) {
+    } catch (e) {
         conv.ask('oh no algo anda mal');
     }
 
 });
-appDW.intent('get_state_device',(conv,params) => {
+
+appDW.intent('get_state_device', (conv, params) => {
 
     try {
         console.log(params);
-        let state=params.status;
-        let device =params.devices;
+        let state = params.status;
+        let device = params.devices;
 
         let deviceFound = findDeviceByName(device.toUpperCase());
-        if(deviceFound==null){
+        if (deviceFound == null) {
             conv.ask('oh no algo anda mal, por favor repite');
-        }
-        else{
+        } else {
 
-            conv.ask("el "+ deviceFound.name+" esta " +stateToString(deviceFound.state));
+            conv.ask("el " + deviceFound.name + " esta " + stateToString(deviceFound.state));
         }
-    }catch (e) {
+    } catch (e) {
         conv.ask('oh no algo anda mal, por favor repite');
     }
 
 
 });
 
+appDW.intent('open_close_device', (conv, params) => {
 
+    try {
+        console.log("open_close_device");
+        console.log(params);
+        let state = params.status;
+        let device = params.devices;
+
+        let deviceFound = findDeviceByName(device.toUpperCase());
+        if (deviceFound != null && state) {
+            deviceFound.state = state;
+            io.emit("changeState", {mode: "OUTPUT", name: deviceFound.name, state: state});
+            conv.ask(toOpenOrClose(state));
+        } else {
+            conv.ask('No entiendo si voy abrir o cerrar');
+        }
+    } catch (e) {
+        conv.ask('oh no algo anda mal, por favor repite');
+    }
+
+
+});
+
+function toOpenOrClose(x) {
+    if (x == "0") {
+        return "cerrado";
+    } else {
+        return "abierto";
+    }
+}
 
 
 console.log("GG!");
@@ -143,12 +189,6 @@ let User = require("./App/Models/User");
 io.on("connection", (socket) => {
 
     console.log("new connection, sockedId: " + socket.id);
-
-
-
-
-
-
 
 
     socket.on("findDestinations", (data) => {
@@ -204,9 +244,9 @@ io.on("connection", (socket) => {
                         console.log("joinToDestination UserfindOneAndUpdate");
                         // user is a User with added destinations
                         if (user && !err) {
-			    let cantUser=doc.numUsers+1;
+                            let cantUser = doc.numUsers + 1;
                             let result = doc.toJSON();
-			    result.numUsers=cantUser+"";
+                            result.numUsers = cantUser + "";
                             socket.emit("joinToDestination", result);
                             Destination.deleteMany({numUser: 0});
                         }
@@ -225,7 +265,7 @@ io.on("connection", (socket) => {
 
     socket.on("getMyDestinations", (data) => {
         let userId = data.userID;
-        User.findOne({idGoogle:userId}, (err, doc) => {
+        User.findOne({idGoogle: userId}, (err, doc) => {
             if (doc) {
                 console.log("getMyDestinations");
                 console.log(doc.destinations);
@@ -238,29 +278,30 @@ io.on("connection", (socket) => {
 
     });
 
-    socket.on("changeStateHouse",(data)=>{
-        let state=data.state;
-        socket.emit("changeStateHouse", {"state": state});
+    socket.on("changeStateHouse", (data) => {
+        let state = data.state;
+        socket.broadcast.emit("changeStateHouse", {"state": state});
     });
-	// change to state value	
+    // change to state value
     socket.on("changeState", (data) => {
         //data = JSON.parse(data);
         console.log(data);
-        let deviceName=data.name;
-        let deviceState=data.state;
+        let deviceName = data.name;
+        let deviceState = data.state;
+        let device = findDeviceByName(deviceName);
+        if (device != null) {
+            device.state = deviceState;
+            if (data.mode === "INPUT") {
+                // si es por ejemplo un sensor de fuego
+                socket.broadcast.emit("changeState", {"name": device.name, "state": device.state, mode: "INPUT"});
 
-        if (data.mode === "INPUT") {
-            // si es por ejemplo un sensor de fuego
-            let device= findDeviceByName(deviceName);
-            if(device!=null){
-                device.state=deviceState;
-                socket.emit("changeState", {"name": device.name, "state":device.state});
-		//io.emit("changeState", {mode: "INPUT", name: device, state: state});
+            } else {
+                // es el led
+                console.log(data.name + " is " + data.state);
+                socket.broadcast.emit("changeState", {"name": device.name, "state": device.state, mode: "OUTPUT"});
             }
-
         } else {
-            // es el led
-            console.log(data.name + " is " + data.state);
+            console.log("device not found");
         }
 
     });
