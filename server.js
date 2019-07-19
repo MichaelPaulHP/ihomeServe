@@ -234,7 +234,7 @@ io.on("connection", (socket) => {
 
                 User.findOneAndUpdate(
                     {idGoogle: userID},
-                    {$push: {destinations: destinationSaved._id}},
+                    {$push: {destinations: res._id}},
                     (err, user, res) => {
                         if (err || !user) {
                             console.error(err + "user not found");
