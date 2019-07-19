@@ -55,7 +55,7 @@ DestinationSchema.methods.toJSON = function () {
         longitude: this.longitude
     };
 };
-DestinationSchema.methods.set = function (data) {
+DestinationSchema.methods.setFromData = function (data) {
 
     this.name = data.name;
     this.color = data.color;

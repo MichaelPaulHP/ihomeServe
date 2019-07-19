@@ -212,44 +212,37 @@ io.on("connection", (socket) => {
 
     socket.on("newDestination", (data) => {
 
-        console.log("newDestination");
-	console.log(data);
-        let userID=data.userID;
+        console.log("newDestination: ");
+
+        let userID = data.userID;
         let destination = new Destination();
-	destination.name = data.name;
-    destination.color = data.color;
-    
-    destination.latitude = data.latitude;
-    destination.longitude = data.longitude;
-    destination.idChat = data.idChat;
-    destination.createBy = data.userID;
-        //destination.set(data);
+        destination.setFromData(data);
         destination.numUsers = 1;
         destination.participants.push(userID);
-        destination.isActive=true;
-
-        destination.save((err, destinationSaved) => {
+        destination.isActive = true;
+        console.log(data);
+        Destination.create(destination, (err, res) => {
             if (err) {
                 console.error(err);
+                socket.emit("newDestination", {error: true});
             } else {
                 let destinationJson = destinationSaved.toJSON();
 
+                socket.emit("newDestination", {error: false});
                 socket.join(destinationSaved._id);
                 socket.emit("joinToDestination", destinationJson);
 
                 User.findOneAndUpdate(
-                    {idGoogle:userID },
+                    {idGoogle: userID},
                     {$push: {destinations: destinationSaved._id}},
                     (err, user, res) => {
-
-                        console.log("newDestination UserfindOneAndUpdate");
-
-                        if (err) {
-                            console.error(err);
+                        if (err || !user) {
+                            console.error(err + "user not found");
                         }
                     });
             }
         });
+
     });
 
 
@@ -257,7 +250,10 @@ io.on("connection", (socket) => {
         let userId = data.userID;
         let idDestination = data.idDestination;
 
-        Destination.findByIdAndUpdate(idDestination,{$push: {participants: idDestination},$inc:{numUsers:1}},(err, doc) => {
+        Destination.findByIdAndUpdate(idDestination, {
+            $push: {participants: idDestination},
+            $inc: {numUsers: 1}
+        }, (err, doc) => {
             //doc is a destinations numUser:previos
             if (doc && !err) {
                 console.log("joinToDestination Destination.findByIdAndUpdate doc");
@@ -314,7 +310,9 @@ io.on("connection", (socket) => {
                             let resJson = res.toJSON();
                             socket.emit("getMyDestinations", resJson);
                         }
-                        if(err){console.error(err)}
+                        if (err) {
+                            console.error(err)
+                        }
                     });
                 }
 
@@ -326,21 +324,21 @@ io.on("connection", (socket) => {
 
     });
 
-    socket.on("completeDestination",(data)=>{
+    socket.on("completeDestination", (data) => {
 
-        let idDestination=data.idDestination;
+        let idDestination = data.idDestination;
 
-        Destination.findByIdAndUpdate(idDestination,{"isActive":false},(err,res)=>{
-            if(!err && res){
+        Destination.findByIdAndUpdate(idDestination, {"isActive": false}, (err, res) => {
+            if (!err && res) {
 
                 // emit to room idDestination include sender
-                io.in(idDestination).emit("completeDestination",idDestination);
+                io.in(idDestination).emit("completeDestination", idDestination);
                 socket.leave(idDestination);
 
-                let participants=res.participants;
-                for(let i=0;i<participants.length;i++){
-                    let idUser=participants[i];
-                    User.findOneAndUpdate({idGoogle:idUser},{ $pull:{destinations:idDestination}},(err,doc,res)=>{
+                let participants = res.participants;
+                for (let i = 0; i < participants.length; i++) {
+                    let idUser = participants[i];
+                    User.findOneAndUpdate({idGoogle: idUser}, {$pull: {destinations: idDestination}}, (err, doc, res) => {
 
                     });
                 }
