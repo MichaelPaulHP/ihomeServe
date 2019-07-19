@@ -213,6 +213,7 @@ io.on("connection", (socket) => {
     socket.on("newDestination", (data) => {
 
         console.log("newDestination");
+	console.log(data);
         let userID=data.userID;
         let destination = new Destination();
 	destination.name = data.name;
