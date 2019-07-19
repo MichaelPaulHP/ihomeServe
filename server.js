@@ -231,7 +231,7 @@ io.on("connection", (socket) => {
 
                 User.findOneAndUpdate(
                     {idGoogle:userID },
-                    {$push: {destinations: idDestination}},
+                    {$push: {destinations: destinationSaved._id}},
                     (err, user, res) => {
 
                         console.log("newDestination UserfindOneAndUpdate");
