@@ -215,7 +215,14 @@ io.on("connection", (socket) => {
         console.log("newDestination");
         let userID=data.userID;
         let destination = new Destination();
-        destination.set(data);
+	destination.name = data.name;
+    destination.color = data.color;
+    
+    destination.latitude = data.latitude;
+    destination.longitude = data.longitude;
+    destination.idChat = data.idChat;
+    destination.createBy = data.userID;
+        //destination.set(data);
         destination.numUsers = 1;
         destination.participants.push(userID);
         destination.isActive=true;
