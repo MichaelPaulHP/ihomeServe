@@ -15,7 +15,7 @@ var DestinationSchema = new schema({
         required: true,
     },
     participants:{
-      type:[{type:String,unique: true}]
+      type:[{type:String}]
     },
     isActive:{
         type: Boolean

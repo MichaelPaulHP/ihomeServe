@@ -226,10 +226,10 @@ io.on("connection", (socket) => {
                 console.error(err);
                 socket.emit("newDestination", {error: true});
             } else {
-                let destinationJson = destinationSaved.toJSON();
+                let destinationJson = res.toJSON();
 
                 socket.emit("newDestination", {error: false});
-                socket.join(destinationSaved._id);
+                socket.join(res._id);
                 socket.emit("joinToDestination", destinationJson);
 
                 User.findOneAndUpdate(
@@ -237,7 +237,7 @@ io.on("connection", (socket) => {
                     {$push: {destinations: res._id}},
                     (err, user, res) => {
                         if (err || !user) {
-                            console.error(err + "user not found");
+                            console.error(err + "or user not found");
                         }
                     });
             }
