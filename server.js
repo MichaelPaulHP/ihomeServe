@@ -210,7 +210,7 @@ io.on("connection", (socket) => {
     });
 
 
-    socket.on("newDestination", (data) => {
+    socket.on("newDestination", async (data) => {
 
         console.log("newDestination: ");
 
@@ -221,27 +221,28 @@ io.on("connection", (socket) => {
         destination.participants.push(userID);
         destination.isActive = true;
         console.log(data);
-        Destination.create(destination, (err, res) => {
-            if (err) {
-                console.error(err);
-                socket.emit("newDestination", {error: true});
-            } else {
-                let destinationJson = res.toJSON();
 
-                socket.emit("newDestination", {error: false});
-                socket.join(res._id);
-                socket.emit("joinToDestination", destinationJson);
+        try {
 
-                User.findOneAndUpdate(
-                    {idGoogle: userID},
-                    {$push: {destinations: res._id}},
-                    (err, user, res) => {
-                        if (err || !user) {
-                            console.error(err + "or user not found");
-                        }
-                    });
-            }
-        });
+            const destinationSaved=await Destination.create(destination) ;
+            let destinationJson = destinationSaved.toJSON();
+
+            socket.emit("newDestination", {error: false});
+            socket.join(destinationSaved._id);
+            socket.emit("joinToDestination", destinationJson);
+
+            const user=await User.findOneAndUpdate(
+                {idGoogle: userID},
+                {$push: {destinations: destinationSaved._id}}).exec();
+
+            //if( !user){ throw new Error("user not found")}
+            console.log(user.destinations);
+
+        }catch (e) {
+            console.error(e);
+            socket.emit("newDestination", {error: true,message:e});
+        }
+
 
     });
 
