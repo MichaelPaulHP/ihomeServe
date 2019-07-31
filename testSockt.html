@@ -16,11 +16,11 @@
     //const socket = io(URL_BASE);
 
     let destinationsFound=[];
-    userID="999766470";
+    userID="DDx0QvdlCQdYtf2jYFIzDpnatc043";
     socket.on('connect', () => {
         console.log(socket.connected); // true
         console.log(socket.id);
-        socket.emit("testSaveUser",{userID:userID});
+        //socket.emit("testSaveUser",{userID:userID});
         /*let localization={name: "777777777",latitude:"999987",longitude:"5444"};
         socket.emit("findDestinations",localization);
         let destination ={
@@ -40,7 +40,8 @@
             console.log("joinToDestination");
             console.log(data);
             socket.emit("getMyDestinations",{userID:userID})
-        });
+        });*/
+        socket.emit("getMyDestinations", {userID:userID});
         socket.on("getMyDestinations",(data)=>{
             console.log("getMyDestinations");
             console.log(data);
@@ -49,7 +50,7 @@
             console.log("changeState");
             console.log(data);
         });
-        socket.emit("message", "hola de html");*/
+        socket.emit("message", "hola de html");
     });
 
 </script>

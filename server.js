@@ -290,38 +290,29 @@ io.on("connection", (socket) => {
     });
 
 
-    socket.on("getMyDestinations", (data) => {
+    socket.on("getMyDestinations", async (data) => {
 
-        console.log("getMyDestinations");
 
         let userId = data.userID;
-        User.findOne({idGoogle: userId}, (err, doc) => {
-            if (doc) {
-                let destinations = doc.destinations;
-                console.log("getMyDestinations");
-                console.log(destinations);
-                for (let i = 0; i < destinations.length; i++) {
-                    let id = destinations[i];
-                    Destination.findById(id, (err, res) => {
-                        if (!err && res) {
+        console.log("getMyDestinations of "+ userId);
+        try {
+            let userSaved= await User.findOne({idGoogle: userId});
+            let destinations= userSaved.destinations;
+            if(destinations.length===0){throw "Destinos: 0";}
+             destinations.forEach(async (id)=>{
+                 console.log(id);
+                 let destinationSaved= await Destination.findById(id);
+                 // join to room idDestination
+                 socket.join(id);
+                 let resJson = destinationSaved.toJSON();
+                 console.log("send destination: "+resJson.idDestination);
+                 socket.emit("getMyDestinations", resJson);
+             });
 
-                            // join to room idDestination
-                            socket.join(id);
-                            let resJson = res.toJSON();
-                            socket.emit("getMyDestinations", resJson);
-                        }
-                        if (err) {
-                            console.error(err)
-                        }
-                    });
-                }
-
-            }
-            if (err) {
-                console.error("ERR getMyDestinations" + err);
-            }
-        });
-
+        }catch (e) {
+            console.error(e);
+            socket.emit("getMyDestinations", {message:e});
+        }
     });
 
     socket.on("completeDestination", (data) => {
