@@ -243,7 +243,6 @@ io.on("connection", (socket) => {
             socket.emit("newDestination", {error: true,message:e});
         }
 
-
     });
 
 
@@ -380,6 +379,7 @@ io.on("connection", (socket) => {
     socket.on("testSaveUser", (data) => {
         let user = new User();
         user.idGoogle = data.userID;
+	console.log("testSaveUser");
         user.save((err, userSaved) => {
             if (userSaved) {
                 console.log("userSaved");
