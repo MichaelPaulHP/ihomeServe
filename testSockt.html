@@ -11,7 +11,7 @@
 
 <script type="text/javascript">
 
-    const socket = io('http://localhost:1337');
+   const socket = io('http://localhost:1337');
     //const URL_BASE="https://ihomeserve.herokuapp.com";
     //const socket = io(URL_BASE);
 
@@ -20,15 +20,15 @@
     socket.on('connect', () => {
         console.log(socket.connected); // true
         console.log(socket.id);
-        //socket.emit("testSaveUser",{userID:userID});
-        let localization={name: "777777777",latitude:"999987",longitude:"5444"};
+        socket.emit("testSaveUser",{userID:userID});
+        /*let localization={name: "777777777",latitude:"999987",longitude:"5444"};
         socket.emit("findDestinations",localization);
         let destination ={
             name:"141451515",color:"3424332",numUsers:"0",
             latitude:"5000",longitude:"777",idChat:"ewwdsfs",
             userID:"041001212"};
         socket.emit("newDestination",destination);
-
+        */
         /*socket.on("destinationsFound",(data)=>{
             destinationsFound.push(data);
             console.log("destinationsFound");
