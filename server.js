@@ -376,16 +376,18 @@ io.on("connection", (socket) => {
         }
 
     });
-    socket.on("testSaveUser", (data) => {
+    socket.on("testSaveUser", async (data) => {
         let user = new User();
         user.idGoogle = data.userID;
-	console.log("testSaveUser");
-        user.save((err, userSaved) => {
-            if (userSaved) {
-                console.log("userSaved");
-                console.log(userSaved);
-            }
-        })
+	    console.log("testSaveUser");
+	    try{
+	        let userSaved = await User.create(user);
+            console.log(userSaved);
+	        socket.emit("testSaveUser",userSaved);
+        }catch (e) {
+            console.error(e)
+        }
+
     });
     socket.on("getDestination", (data) => {
         let idDestination = data.idDestination;
