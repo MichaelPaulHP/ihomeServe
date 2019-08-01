@@ -16,32 +16,32 @@
     //const socket = io(URL_BASE);
 
     let destinationsFound=[];
-    userID="DDx0QvdlCQdYtf2jYFIzDpnatc043";
+    userID="Dx0QvdlCQdYtf2jYFIzDpnatc043";
     socket.on('connect', () => {
         console.log(socket.connected); // true
         console.log(socket.id);
-        //socket.emit("testSaveUser",{userID:userID});
-        /*let localization={name: "777777777",latitude:"999987",longitude:"5444"};
+        //socket.emit("testSaveUser",{userID:userID});DSM DEL PERU SA",
+       let localization={name: "DSM DEL PERU SA",latitude:"999987",longitude:"5444"};
         socket.emit("findDestinations",localization);
-        let destination ={
+       /* let destination ={
             name:"141451515",color:"3424332",numUsers:"0",
             latitude:"5000",longitude:"777",idChat:"ewwdsfs",
             userID:"041001212"};
-        socket.emit("newDestination",destination);
-        */
-        /*socket.on("destinationsFound",(data)=>{
+        socket.emit("newDestination",destination);*/
+
+        socket.on("destinationsFound",(data)=>{
             destinationsFound.push(data);
             console.log("destinationsFound");
             console.log(destinationsFound);
-            let destionToJoin= {userID:userID,idDestination:data.idDestination};
-            socket.emit("joinToDestination",destionToJoin);
+            //let destionToJoin= {userID:userID,idDestination:data.idDestination};
+            //socket.emit("joinToDestination",destionToJoin);
         });
-        socket.on("joinToDestination",(data)=>{
+        /*socket.on("joinToDestination",(data)=>{
             console.log("joinToDestination");
             console.log(data);
             socket.emit("getMyDestinations",{userID:userID})
-        });*/
-        socket.emit("getMyDestinations", {userID:userID});
+        });
+        /*socket.emit("getMyDestinations", {userID:userID});
         socket.on("getMyDestinations",(data)=>{
             console.log("getMyDestinations");
             console.log(data);
@@ -49,7 +49,7 @@
         socket.on("changeState",(data)=>{
             console.log("changeState");
             console.log(data);
-        });
+        });*/
         socket.emit("message", "hola de html");
     });
 

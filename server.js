@@ -191,18 +191,19 @@ io.on("connection", (socket) => {
     console.log("new connection, sockedId: " + socket.id);
 
 
-    socket.on("findDestinations", (data) => {
+    socket.on("findDestinations", async (data) => {
         // data = localization
         // find locations mas j
-        Destination.findOne({name: data.name}, (err, destination) => {
-            if (destination) {
-                let result = destination.toJSON();
-                console.log("findDestinations");
-                console.log(result);
-                socket.emit("destinationsFound", result);
-            }
-        });
+        console.log("findDestinations "+data.name);
+        try {
+            let destinationSaved= await Destination.findOne({name:data.name});
+            let result = destinationSaved.toJSON();
+            console.log("send destination: "+result.idDestination);
+            socket.emit("destinationsFound", result);
 
+        }catch (e) {
+            console.error(e);
+        }
 
     });
     socket.on("myLocalizationChange", (data) => {
