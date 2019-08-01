@@ -247,11 +247,32 @@ io.on("connection", (socket) => {
     });
 
 
-    socket.on("joinToDestination", (data) => {
+    socket.on("joinToDestination", async (data) => {
         let userId = data.userID;
         let idDestination = data.idDestination;
+        console.log("join "+userId+" to "+idDestination);
+        try{
+            let destinationSaved= await Destination.findByIdAndUpdate(idDestination, {
+                                    $push: {participants: userId},
+                                    $inc: {numUsers: 1}
+                                }).exec();
+            destinationSaved.numUsers = destinationSaved.numUsers + 1;
+            let destinationJson = destinationSaved.toJSON();
+            // sending to all clients in 'game' room, including sender
+            socket.join(idDestination);
+            io.in(idDestination).emit('joinToDestination', destinationJson);
 
-        Destination.findByIdAndUpdate(idDestination, {
+            let userSaved= User.findOneAndUpdate(
+                {idGoogle: userId},
+                {$push: {destinations: idDestination}}).exec();
+
+            console.log(userSaved.destinations);
+
+        }catch (e) {
+            console.error(e);
+        }
+
+        /*Destination.findByIdAndUpdate(idDestination, {
             $push: {participants: idDestination},
             $inc: {numUsers: 1}
         }, (err, doc) => {
@@ -287,7 +308,7 @@ io.on("connection", (socket) => {
             if (err) {
                 console.error("ERR Destination.findByIdAndUpdate" + err);
             }
-        });
+        });*/
     });
 
 

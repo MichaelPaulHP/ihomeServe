@@ -22,25 +22,28 @@
         console.log(socket.id);
         //socket.emit("testSaveUser",{userID:userID});DSM DEL PERU SA",
        let localization={name: "DSM DEL PERU SA",latitude:"999987",longitude:"5444"};
-        socket.emit("findDestinations",localization);
+        //socket.emit("findDestinations",localization);
        /* let destination ={
             name:"141451515",color:"3424332",numUsers:"0",
             latitude:"5000",longitude:"777",idChat:"ewwdsfs",
             userID:"041001212"};
         socket.emit("newDestination",destination);*/
 
-        socket.on("destinationsFound",(data)=>{
+        /*socket.on("destinationsFound",(data)=>{
             destinationsFound.push(data);
             console.log("destinationsFound");
             console.log(destinationsFound);
             //let destionToJoin= {userID:userID,idDestination:data.idDestination};
             //socket.emit("joinToDestination",destionToJoin);
-        });
-        /*socket.on("joinToDestination",(data)=>{
+        });*/
+        let idDestination="5d4259f422b3c500178b9359";
+        socket.emit("joinToDestination",{userID:userID,idDestination:idDestination});
+        socket.on("joinToDestination",(data)=>{
             console.log("joinToDestination");
             console.log(data);
-            socket.emit("getMyDestinations",{userID:userID})
+            //socket.emit("getMyDestinations",{userID:userID})
         });
+
         /*socket.emit("getMyDestinations", {userID:userID});
         socket.on("getMyDestinations",(data)=>{
             console.log("getMyDestinations");
